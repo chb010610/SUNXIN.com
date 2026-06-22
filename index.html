@@ -5602,7 +5602,7 @@ function handleFkTemplateImport(e){
   reader.readAsArrayBuffer(file);
 }
 
-// 反恐供应商公章生成 - 直径187px，字间距19度，超过11字字间距16度
+// 反恐供应商公章生成 - 直径187px，字间距30度（更宽字间距）
 function makeFkSealPng(name){
   const px=187;return new Promise(function(resolve){
     const canvas=document.createElement('canvas');canvas.width=px;canvas.height=px;
@@ -5614,15 +5614,18 @@ function makeFkSealPng(name){
     ctx.beginPath();
     for(let j=0;j<10;j++){const a=(j*Math.PI/5)-Math.PI/2,r=j%2===0?sr:ir;const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a);j===0?ctx.moveTo(x,y):ctx.lineTo(x,y)}
     ctx.closePath();ctx.fill();
-    ctx.lineWidth=4;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 25px SimSun';
+    ctx.lineWidth=4;ctx.textAlign='center';ctx.textBaseline='middle';
     const chars=name.split('');const n=chars.length;
-    const perCharDeg=19;
+    const fontSize=n>=11?25:30;
+    ctx.font=`bold ${fontSize}px SimSun`;
+    const perCharDeg=n>=11?18:24;
+    const scaleX=n>=11?0.7:0.75,scaleY=n>=11?1.6:1.3;
     const arcDeg=Math.min(340,n*perCharDeg),startDeg=-90-arcDeg/2;
     for(let ci=0;ci<n;ci++){
       const deg=startDeg+(arcDeg/(n-1||1))*ci;
       const rad=deg*Math.PI/180;
       ctx.save();ctx.translate(cx+textR*Math.cos(rad),cy+textR*Math.sin(rad));ctx.rotate(rad+Math.PI/2);
-      ctx.scale(0.8,1.6);ctx.fillText(chars[ci],0,0);ctx.restore();
+      ctx.scale(scaleX,scaleY);ctx.fillText(chars[ci],0,0);ctx.restore();
     }
     canvas.toBlob(function(b){const fr=new FileReader();fr.onloadend=function(){resolve(fr.result)};fr.readAsDataURL(b)},'image/png');
   });
